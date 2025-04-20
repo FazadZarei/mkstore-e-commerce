@@ -26,8 +26,7 @@ import { RxCross1, RxHamburgerMenu } from "react-icons/rx";
 import TopSlider from "../components/TopSlider";
 import SaleSection from "../components/SaleSection";
 import ProductCard from "../components/ProductCard";
-import { LE_products, SALE_products } from "../data/products";
-import { menuItems } from "../data/menuItems";
+import { fetchProducts, fetchMenuItems } from "../services/api";
 import { IoIosArrowDown } from "react-icons/io";
 
 export default function Home() {
@@ -35,6 +34,25 @@ export default function Home() {
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [prevScroll, setPrevScroll] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
+  const [products, setProducts] = useState({
+    LE_products: [],
+    SALE_products: [],
+  });
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const productsData = await fetchProducts();
+        const menuItemsData = await fetchMenuItems();
+        setProducts(productsData);
+        setMenuItems(menuItemsData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +64,9 @@ export default function Home() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScroll]);
+
+  console.log(products);
+  console.log(menuItems);
 
   return (
     <main className="min-h-screen">
@@ -126,7 +147,7 @@ export default function Home() {
                               className="overflow-hidden"
                             >
                               <div className="pl-4 mt-4 space-y-4">
-                                {item.submenu.map((subItem, subIndex) => (
+                                {item.submenu?.map((subItem, subIndex) => (
                                   <motion.a
                                     key={subIndex}
                                     href={subItem.href}
@@ -218,7 +239,7 @@ export default function Home() {
           className="relative px-10"
         >
           {[...Array(2)].map((_, arrayIndex) =>
-            LE_products.map((product) => (
+            products.LE_products.map((product) => (
               <SwiperSlide key={`${product.id}-${arrayIndex}`}>
                 <ProductCard
                   image1={product.image1}
@@ -260,6 +281,7 @@ export default function Home() {
           }
         `}</style>
       </section>
+
       {/* Abstract Collection Section */}
       <SaleSection
         images={[
@@ -268,7 +290,8 @@ export default function Home() {
         ]}
         title="ABSTRACT COLLECTION"
       />
-      {/* Featured Collection */}
+
+      {/* Sale Products Section */}
       <section className="py-16 px-10 relative">
         <Swiper
           modules={[Navigation]}
@@ -290,7 +313,7 @@ export default function Home() {
           className="relative px-10"
         >
           {[...Array(2)].map((_, arrayIndex) =>
-            SALE_products.map((product) => (
+            products.SALE_products.map((product) => (
               <SwiperSlide key={`${product.id}-${arrayIndex}`}>
                 <ProductCard
                   image1={product.image1}
@@ -309,29 +332,8 @@ export default function Home() {
           <div className="swiper-button-prev"></div>
           <div className="swiper-button-next"></div>
         </Swiper>
-
-        <style jsx global>{`
-          .swiper-button-next,
-          .swiper-button-prev {
-            color: black;
-            width: 30px !important;
-            height: 30px !important;
-          }
-
-          .swiper-button-next:after,
-          .swiper-button-prev:after {
-            font-size: 15px !important;
-          }
-
-          .swiper-button-prev {
-            left: 10px;
-          }
-
-          .swiper-button-next {
-            right: 10px;
-          }
-        `}</style>
       </section>
+
       {/* Insulated Loft Collection Section */}
       <SaleSection
         images={[
@@ -344,8 +346,6 @@ export default function Home() {
       {/* Newsletter Section */}
       <section className="relative mx-10">
         <div className="relative h-[400px]">
-          {" "}
-          {/* Adjust height as needed */}
           <Image
             src="https://i.postimg.cc/3RBNcsPN/young-beautiful-girl-black-hat-posing-white-wall.jpg"
             alt="Sign up background"

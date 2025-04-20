@@ -1,0 +1,179 @@
+"use client";
+
+import { motion, AnimatePresence } from "motion/react";
+import { useState, useEffect } from "react";
+import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
+import { PiMagnifyingGlassThin, PiHandbagThin } from "react-icons/pi";
+import { CiUser } from "react-icons/ci";
+import { IoIosArrowDown } from "react-icons/io";
+
+export default function Header({ isDashboard = false }) {
+  const [isScrollingDown, setIsScrollingDown] = useState(false);
+  const [prevScroll, setPrevScroll] = useState(0);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [menuItems, setMenuItems] = useState([]);
+
+  // Load menu items from API
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      try {
+        const response = await fetch("http://localhost:5001/api/menu-items");
+        if (response.ok) {
+          const data = await response.json();
+          setMenuItems(data);
+        }
+      } catch (error) {
+        console.error("Error loading menu items:", error);
+      }
+    };
+    loadMenuItems();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScroll = window.pageYOffset;
+      setIsScrollingDown(currentScroll > prevScroll);
+      setPrevScroll(currentScroll);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScroll]);
+
+  return (
+    <header
+      className={`sticky top-8 z-50 transition-colors duration-300 
+      ${!isScrollingDown ? "bg-white text-black" : "bg-transparent"}`}
+      id="header"
+    >
+      <div className="px-10 py-4 flex items-center justify-between">
+        <button
+          className="text-2xl hover:text-gray-600"
+          aria-label="Menu"
+          onClick={() =>
+            document
+              .getElementById("mobileMenu")
+              .classList.remove("-translate-x-full")
+          }
+        >
+          <RxHamburgerMenu className="h-6 w-6" />
+        </button>
+        <div className="text-2xl font-bold">MKI MIYUKI ZOKU</div>
+
+        {/* Menu */}
+        <div
+          className="fixed w-1/3 inset-0 top-8 bg-white/70 backdrop-blur-sm z-50 transform -translate-x-full transition-transform duration-300"
+          id="mobileMenu"
+        >
+          <div className="py-4 px-10">
+            <button
+              className="absolute top-10 left-10 text-2xl"
+              id="closeMenu"
+              onClick={() =>
+                document
+                  .getElementById("mobileMenu")
+                  .classList.add("-translate-x-full")
+              }
+            >
+              <RxCross1 />
+            </button>
+            <nav
+              className="flex flex-col space-y-8 font-senary font-light mt-20 text-sm 
+              max-h-[70vh] overflow-y-auto scrollbar-none"
+            >
+              {menuItems.map(
+                (item, index) =>
+                  !item.isHidden && (
+                    <div key={index} className="group">
+                      <div
+                        onClick={() =>
+                          item.has_submenu === 1 &&
+                          setOpenMenu(
+                            openMenu === item.title ? null : item.title
+                          )
+                        }
+                        className="hover:text-gray-600 cursor-pointer flex items-center justify-between"
+                      >
+                        {item.title}
+                        {item.has_submenu === 1 && (
+                          <motion.div
+                            animate={{
+                              rotate: openMenu === item.title ? 180 : 0,
+                            }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                          >
+                            <IoIosArrowDown className="h-4 w-4" />
+                          </motion.div>
+                        )}
+                      </div>
+
+                      <AnimatePresence>
+                        {openMenu === item.title && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="pl-4 mt-4 space-y-4">
+                              {item.submenu?.map((subItem, subIndex) => (
+                                <motion.a
+                                  key={subIndex}
+                                  href={subItem.href}
+                                  initial={{ x: -10, opacity: 0 }}
+                                  animate={{ x: 0, opacity: 1 }}
+                                  transition={{
+                                    delay: subIndex * 0.1,
+                                    duration: 0.2,
+                                  }}
+                                  className="block hover:text-gray-600"
+                                >
+                                  {subItem.title}
+                                </motion.a>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+              )}
+            </nav>
+
+            <style jsx global>{`
+              .scrollbar-none {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+              }
+
+              .scrollbar-none::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-6">
+          {!isDashboard && (
+            <>
+              <button className="hover:text-gray-600" aria-label="Search">
+                <PiMagnifyingGlassThin className="h-5 w-5" />
+              </button>
+              <button className="hover:text-gray-600" aria-label="Profile">
+                <CiUser className="h-5 w-5" />
+              </button>
+              <button
+                className="hover:text-gray-600 flex flex-col items-center relative"
+                aria-label="Cart"
+              >
+                <span className="text-xs absolute top-2 ">0</span>
+                <PiHandbagThin className="h-7 w-6" />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

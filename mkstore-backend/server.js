@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const apiRoutes = require("./routes/api");
 
 const app = express();
 
@@ -8,10 +9,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// API Routes
+app.use("/api", apiRoutes);
+
 // Initialize database and start server
 const initServer = async () => {
   try {
-    // Database will be created if it doesn't exist
+    // Test database connection
     const db = await require("./config/db");
 
     // Test route

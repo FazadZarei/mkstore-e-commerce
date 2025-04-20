@@ -44,3 +44,40 @@ jest-test-results.json
 
 # Static files that are generated during build (e.g., images, etc.)
 public/static/
+
+
+mkstore-backend/database/migrations/
+
+
+# Dependencies
+mkstore-backend/node_modules/
+mkstore-backend/npm-debug.log
+mkstore-backend/yarn-debug.log
+mkstore-backend/yarn-error.log
+
+# Environment variables
+mkstore-backend/.env
+mkstore-backend/.env.local
+mkstore-backend/.env.*.local
+
+# IDE
+mkstore-backend/.idea/
+mkstore-backend/.vscode/
+mkstore-backend/*.swp
+mkstore-backend/*.swo
+
+# Database
+mkstore-backend/database/migrations/
+
+# Logs
+mkstore-backend/logs/
+mkstore-backend/*.log
+
+# OS
+mkstore-backend/.DS_Store
+mkstore-backend/Thumbs.db
+mkstore-backend/uploads/
+.gitignore
+dashboard
+ProductForm.js
+not_commit.js

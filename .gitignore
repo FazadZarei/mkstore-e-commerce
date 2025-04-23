@@ -76,8 +76,4 @@ mkstore-backend/*.log
 # OS
 mkstore-backend/.DS_Store
 mkstore-backend/Thumbs.db
-mkstore-backend/uploads/
-.gitignore
-dashboard
-ProductForm.js
-not_commit.js
+

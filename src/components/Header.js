@@ -2,12 +2,14 @@
 
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
 import { PiMagnifyingGlassThin, PiHandbagThin } from "react-icons/pi";
 import { CiUser } from "react-icons/ci";
 import { IoIosArrowDown } from "react-icons/io";
 
 export default function Header({ isDashboard = false }) {
+  const router = useRouter();
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [prevScroll, setPrevScroll] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
@@ -40,6 +42,16 @@ export default function Header({ isDashboard = false }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScroll]);
 
+  const handleNavigation = (href) => {
+    // Close mobile menu if open
+    const mobileMenu = document.getElementById("mobileMenu");
+    if (mobileMenu) {
+      mobileMenu.classList.add("-translate-x-full");
+    }
+    // Navigate to the route
+    router.push(href);
+  };
+
   return (
     <header
       className={`sticky top-8 z-50 transition-colors duration-300 
@@ -58,7 +70,12 @@ export default function Header({ isDashboard = false }) {
         >
           <RxHamburgerMenu className="h-6 w-6" />
         </button>
-        <div className="text-2xl font-bold">MKI MIYUKI ZOKU</div>
+        <div
+          className="text-2xl font-bold cursor-pointer"
+          onClick={() => handleNavigation("/")}
+        >
+          MKI MIYUKI ZOKU
+        </div>
 
         {/* Menu */}
         <div
@@ -87,10 +104,11 @@ export default function Header({ isDashboard = false }) {
                     <div key={index} className="group">
                       <div
                         onClick={() =>
-                          item.has_submenu === 1 &&
-                          setOpenMenu(
-                            openMenu === item.title ? null : item.title
-                          )
+                          item.has_submenu === 1
+                            ? setOpenMenu(
+                                openMenu === item.title ? null : item.title
+                              )
+                            : handleNavigation("/" + item.href)
                         }
                         className="hover:text-gray-600 cursor-pointer flex items-center justify-between"
                       >
@@ -118,19 +136,19 @@ export default function Header({ isDashboard = false }) {
                           >
                             <div className="pl-4 mt-4 space-y-4">
                               {item.submenu?.map((subItem, subIndex) => (
-                                <motion.a
+                                <motion.div
                                   key={subIndex}
-                                  href={subItem.href}
                                   initial={{ x: -10, opacity: 0 }}
                                   animate={{ x: 0, opacity: 1 }}
                                   transition={{
                                     delay: subIndex * 0.1,
                                     duration: 0.2,
                                   }}
-                                  className="block hover:text-gray-600"
+                                  className="block hover:text-gray-600 cursor-pointer"
+                                  onClick={() => handleNavigation(subItem.href)}
                                 >
                                   {subItem.title}
-                                </motion.a>
+                                </motion.div>
                               ))}
                             </div>
                           </motion.div>

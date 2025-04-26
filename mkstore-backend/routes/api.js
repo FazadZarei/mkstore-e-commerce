@@ -1,11 +1,54 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
+const pool = require("../config/db");
+
+// Check and create products table if it doesn't exist
+const ensureProductsTable = async () => {
+  try {
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS products (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        colors JSON,
+        image1 VARCHAR(255),
+        image2 VARCHAR(255),
+        type VARCHAR(50) NOT NULL,
+        tag VARCHAR(255),
+        size JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+  } catch (error) {
+    console.error("Error creating products table:", error);
+    throw error;
+  }
+};
+
+// Check and create menu_items table if it doesn't exist
+const ensureMenuItemsTable = async () => {
+  try {
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS menu_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        url VARCHAR(255) NOT NULL,
+        has_submenu BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch (error) {
+    console.error("Error creating menu_items table:", error);
+    throw error;
+  }
+};
 
 // Get all menu items
 router.get("/menu-items", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM menu_items");
+    await ensureMenuItemsTable();
+    const [rows] = await pool.query("SELECT * FROM menu_items");
     res.json(rows);
   } catch (error) {
     console.error("Error fetching menu items:", error);
@@ -16,14 +59,9 @@ router.get("/menu-items", async (req, res) => {
 // Get all products
 router.get("/products", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM products");
-    // Convert BLOBs to base64 for all products
-    const products = rows.map((product) => ({
-      ...product,
-      image1: product.image1.toString("base64"),
-      image2: product.image2.toString("base64"),
-    }));
-    res.json(products);
+    await ensureProductsTable();
+    const [rows] = await pool.query("SELECT * FROM products");
+    res.json(rows);
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({ error: "Failed to fetch products" });
@@ -33,19 +71,14 @@ router.get("/products", async (req, res) => {
 // Get product by ID
 router.get("/products/:id", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM products WHERE id = ?", [
+    await ensureProductsTable();
+    const [rows] = await pool.query("SELECT * FROM products WHERE id = ?", [
       req.params.id,
     ]);
     if (rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
-
-    const product = rows[0];
-    // Convert BLOB to base64 for sending to client
-    product.image1 = product.image1.toString("base64");
-    product.image2 = product.image2.toString("base64");
-
-    res.json(product);
+    res.json(rows[0]);
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ error: "Failed to fetch product" });
@@ -55,6 +88,7 @@ router.get("/products/:id", async (req, res) => {
 // Create a new product
 router.post("/products", async (req, res) => {
   try {
+    await ensureProductsTable();
     const { title, price, colors, image1, image2, type, tag, options } =
       req.body;
 
@@ -90,7 +124,7 @@ router.post("/products", async (req, res) => {
       return res.status(400).json({ error: "Invalid image1 URL" });
     }
 
-    const [result] = await db.query(
+    const [result] = await pool.execute(
       "INSERT INTO products (title, price, colors, image1, image2, type, tag, options) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         title,
@@ -120,6 +154,7 @@ router.post("/products", async (req, res) => {
 // Update product
 router.put("/products/:id", async (req, res) => {
   try {
+    await ensureProductsTable();
     const { title, price, colors, image1, image2, type, tag, options } =
       req.body;
     const productId = req.params.id;
@@ -156,7 +191,7 @@ router.put("/products/:id", async (req, res) => {
       return res.status(400).json({ error: "Invalid image1 URL" });
     }
 
-    const [result] = await db.query(
+    const [result] = await pool.execute(
       "UPDATE products SET title = ?, price = ?, colors = ?, image1 = ?, image2 = ?, type = ?, tag = ?, options = ? WHERE id = ?",
       [
         title,
@@ -185,11 +220,12 @@ router.put("/products/:id", async (req, res) => {
 // Delete product
 router.delete("/products/:id", async (req, res) => {
   try {
-    const result = await db.query("DELETE FROM products WHERE id = ?", [
+    await ensureProductsTable();
+    const [result] = await pool.execute("DELETE FROM products WHERE id = ?", [
       req.params.id,
     ]);
 
-    if (result[0].affectedRows === 0) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 

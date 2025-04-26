@@ -1,12 +1,15 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { RxHamburgerMenu, RxCross1 } from "react-icons/rx";
 import { PiMagnifyingGlassThin, PiHandbagThin } from "react-icons/pi";
 import { CiUser } from "react-icons/ci";
 import { IoIosArrowDown } from "react-icons/io";
+import { FiSearch, FiUser, FiShoppingCart, FiLogOut } from "react-icons/fi";
+import Link from "next/link";
+import { useCart } from "../context/CartContext";
 
 export default function Header({ isDashboard = false }) {
   const router = useRouter();
@@ -14,6 +17,8 @@ export default function Header({ isDashboard = false }) {
   const [prevScroll, setPrevScroll] = useState(0);
   const [openMenu, setOpenMenu] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
+  const [user, setUser] = useState(null);
+  const { cart } = useCart();
 
   // Load menu items from API
   useEffect(() => {
@@ -42,6 +47,13 @@ export default function Header({ isDashboard = false }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScroll]);
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const handleNavigation = (href) => {
     // Close mobile menu if open
     const mobileMenu = document.getElementById("mobileMenu");
@@ -50,6 +62,13 @@ export default function Header({ isDashboard = false }) {
     }
     // Navigate to the route
     router.push(href);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    router.push("/");
   };
 
   return (
@@ -176,21 +195,34 @@ export default function Header({ isDashboard = false }) {
           {!isDashboard && (
             <>
               <button className="hover:text-gray-600" aria-label="Search">
-                <PiMagnifyingGlassThin className="h-5 w-5" />
+                <FiSearch className="h-5 w-5" />
               </button>
-              <button className="hover:text-gray-600" aria-label="Profile">
-                <CiUser className="h-5 w-5" />
-              </button>
-              <button
-                className="hover:text-gray-600 flex flex-col items-center relative"
+              <Link
+                href="/cart"
+                className="hover:text-gray-600"
                 aria-label="Cart"
               >
-                <span className="text-xs absolute top-2 ">0</span>
-                <PiHandbagThin className="h-7 w-6" />
-              </button>
+                <FiShoppingCart className="h-5 w-5" />
+              </Link>
             </>
           )}
         </div>
+
+        {user ? (
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-700">{user.name}</span>
+            <button
+              onClick={handleLogout}
+              className="text-gray-700 hover:text-black"
+            >
+              <FiLogOut className="w-5 h-5" />
+            </button>
+          </div>
+        ) : (
+          <Link href="/login" className="text-gray-700 hover:text-black">
+            <FiUser className="w-5 h-5" />
+          </Link>
+        )}
       </div>
     </header>
   );

@@ -19,18 +19,21 @@ export default function ProductForm({
   error = null,
   submitText = "Create Product",
 }) {
-  const [formData, setFormData] = useState(
-    initialData || {
-      title: "",
-      price: "",
-      colors: "",
-      image1: "",
-      image2: "",
-      type: "LIMITED EDITION",
-      tag: "",
-      options: "",
+  const [formData, setFormData] = useState(() => {
+    if (!initialData) {
+      return {
+        title: "",
+        price: "",
+        colors: "",
+        image1: "",
+        image2: "",
+        type: "LIMITED EDITION",
+        tag: "",
+        options: "",
+      };
     }
-  );
+    return initialData;
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,16 +45,20 @@ export default function ProductForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Process form data
     const processedData = {
       ...formData,
       price: parseFloat(formData.price),
       colors: formData.colors.split(",").map((color) => color.trim()),
-      options: formData.options.split(",").map((option) => option.trim()),
+      options:
+        formData?.options && !Array.isArray(formData?.options)
+          ? formData?.options?.split(",")?.map((option) => option?.trim())
+          : Array.isArray(formData?.options)
+          ? formData.options
+          : [],
     };
 
     onSubmit(processedData);
+    console.log(formData);
   };
 
   return (
@@ -116,22 +123,21 @@ export default function ProductForm({
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="Enter colors (comma separated)"
+                placeholder="Enter colors separated by commas"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Options *
+                Options
               </label>
               <input
                 type="text"
                 name="options"
                 value={formData.options}
                 onChange={handleChange}
-                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="Enter options (comma separated, e.g., Size, Color, etc.)"
+                placeholder="Enter options separated by commas"
               />
             </div>
 
@@ -161,12 +167,12 @@ export default function ProductForm({
                 value={formData.tag}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="Optional tag for the product"
+                placeholder="Enter product tag"
               />
             </div>
           </div>
 
-          {/* Right Column - Image URLs */}
+          {/* Right Column */}
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -179,7 +185,7 @@ export default function ProductForm({
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="https://example.com/image1.jpg"
+                placeholder="Enter image URL"
               />
             </div>
 
@@ -194,24 +200,17 @@ export default function ProductForm({
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent transition"
-                placeholder="https://example.com/image2.jpg"
+                placeholder="Enter image URL"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={() => window.history.back()}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-          >
-            Cancel
-          </button>
+        <div className="flex justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : submitText}
           </button>

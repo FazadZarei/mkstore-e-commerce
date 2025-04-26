@@ -2,7 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
+<<<<<<< HEAD
 const apiRoutes = require("./routes/api");
+=======
+<<<<<<< HEAD
+const apiRoutes = require("./routes/api");
+=======
+>>>>>>> 0fff5d76c887910c2050322b0425678a5e592877
+>>>>>>> 5b1f41119e7facfc8860b0b7d1099c90ebaecfec
 
 const app = express();
 
@@ -11,6 +18,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5b1f41119e7facfc8860b0b7d1099c90ebaecfec
 // API Routes
 app.use("/api", apiRoutes);
 
@@ -26,6 +37,15 @@ app.get("*", (req, res) => {
 const initServer = async () => {
   try {
     // Test database connection
+<<<<<<< HEAD
+=======
+=======
+// Initialize database and start server
+const initServer = async () => {
+  try {
+    // Database will be created if it doesn't exist
+>>>>>>> 0fff5d76c887910c2050322b0425678a5e592877
+>>>>>>> 5b1f41119e7facfc8860b0b7d1099c90ebaecfec
     const db = await require("./config/db");
 
     // Test route

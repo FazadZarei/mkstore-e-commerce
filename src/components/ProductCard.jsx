@@ -1,6 +1,10 @@
+"use client";
+
 import React from "react";
+import { useCart } from "../context/CartContext";
 
 const ProductCard = ({
+  id,
   image1,
   image2,
   title,
@@ -9,8 +13,29 @@ const ProductCard = ({
   tag,
   options,
 }) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (e) => {
+    e.preventDefault(); // Prevent the default link behavior
+    addToCart({
+      id,
+      image1,
+      image2,
+      title,
+      price,
+      colors,
+      tag,
+      options,
+    });
+    alert(`${title} has been added to your cart!`);
+  };
+
   return (
-    <a href="#" className="group block overflow-hidden text-primary">
+    <a
+      href="#"
+      className="group block overflow-hidden text-primary"
+      onClick={handleAddToCart}
+    >
       <div className="relative h-[350px] sm:h-[650px]">
         <img
           src={image1}

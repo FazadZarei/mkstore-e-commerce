@@ -77,7 +77,7 @@ export default function Header({ isDashboard = false }) {
       ${!isScrollingDown ? "bg-white text-black" : "bg-transparent"}`}
       id="header"
     >
-      <div className="px-10 py-4 flex items-center justify-between">
+      <div className="px-4 md:px-10 py-4 flex items-center justify-between">
         <button
           className="text-2xl hover:text-gray-600"
           aria-label="Menu"
@@ -90,7 +90,7 @@ export default function Header({ isDashboard = false }) {
           <RxHamburgerMenu className="h-6 w-6" />
         </button>
         <div
-          className="text-2xl font-bold cursor-pointer"
+          className="text-xl md:text-2xl font-bold cursor-pointer"
           onClick={() => handleNavigation("/")}
         >
           MKI MIYUKI ZOKU
@@ -101,7 +101,7 @@ export default function Header({ isDashboard = false }) {
           className="fixed w-1/3 inset-0 top-8 bg-white/70 backdrop-blur-sm z-50 transform -translate-x-full transition-transform duration-300"
           id="mobileMenu"
         >
-          <div className="py-4 px-10">
+          <div className="py-4 px-4 md:px-10">
             <button
               className="absolute top-10 left-10 text-2xl"
               id="closeMenu"
@@ -177,21 +177,10 @@ export default function Header({ isDashboard = false }) {
                   )
               )}
             </nav>
-
-            <style jsx global>{`
-              .scrollbar-none {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-              }
-
-              .scrollbar-none::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
           </div>
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4 md:space-x-6">
           {!isDashboard && (
             <>
               <button className="hover:text-gray-600" aria-label="Search">
@@ -199,18 +188,25 @@ export default function Header({ isDashboard = false }) {
               </button>
               <Link
                 href="/cart"
-                className="hover:text-gray-600"
+                className="hover:text-gray-600 relative"
                 aria-label="Cart"
               >
                 <FiShoppingCart className="h-5 w-5" />
+                {cart.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
               </Link>
             </>
           )}
         </div>
 
         {user ? (
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">{user.name}</span>
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <span className="text-sm md:text-base text-gray-700 hidden md:block">
+              {user.name}
+            </span>
             <button
               onClick={handleLogout}
               className="text-gray-700 hover:text-black"
@@ -224,6 +220,17 @@ export default function Header({ isDashboard = false }) {
           </Link>
         )}
       </div>
+
+      <style jsx global>{`
+        .scrollbar-none {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </header>
   );
 }

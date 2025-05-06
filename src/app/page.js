@@ -134,6 +134,7 @@ export default function Home() {
             products.LE_products.map((product) => (
               <SwiperSlide key={`${product.id}-${arrayIndex}`}>
                 <ProductCard
+                  id={product.id}
                   image1={product.image1}
                   image2={product.image2}
                   title={product.title}
@@ -208,6 +209,7 @@ export default function Home() {
             products.SALE_products.map((product) => (
               <SwiperSlide key={`${product.id}-${arrayIndex}`}>
                 <ProductCard
+                  id={product.id}
                   image1={product.image1}
                   image2={product.image2}
                   title={product.title}

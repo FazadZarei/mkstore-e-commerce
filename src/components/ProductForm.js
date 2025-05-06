@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function ProductForm({
   initialData = {
@@ -34,6 +35,8 @@ export default function ProductForm({
     }
     return initialData;
   });
+
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -206,13 +209,20 @@ export default function ProductForm({
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex gap-4 justify-end">
           <button
             type="submit"
             disabled={loading}
             className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : submitText}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Cancel
           </button>
         </div>
       </form>

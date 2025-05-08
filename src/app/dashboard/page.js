@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../components/Header";
 import { fetchProducts } from "../../services/api";
@@ -10,17 +10,30 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const alertShown = useRef(false);
+
+  const checkAuth = () => {
+    const user = localStorage.getItem("user");
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    // Parse the user object and check for admin role
+    const userData = JSON.parse(user);
+    if (userData.role !== "admin") {
+      router.push("/");
+      if (!alertShown.current) {
+        alert("You are not authorized to access this page");
+        alertShown.current = true;
+      }
+      return;
+    }
+
+    loadProducts();
+  };
 
   useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem("user");
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-      loadProducts();
-    };
-
     checkAuth();
   }, [router]);
 
